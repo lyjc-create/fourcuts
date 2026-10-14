@@ -25,7 +25,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .section-title{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 h2{font-size:21px;margin:0}
 .step{font-size:13px;border:1px solid #dcd8d0;border-radius:50%;width:35px;height:35px;display:grid;place-items:center;flex:none}
-.templates{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.templates{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .template{background:#f8f7f4;border:2px solid transparent;display:flex;align-items:center;flex-direction:column;padding:24px}
 .template.selected{border-color:#3c5146;background:#f2f5f1}
 .template strong{margin-top:14px}
@@ -34,10 +34,20 @@ h2{font-size:21px;margin:0}
 .mini i{background:linear-gradient(145deg,#ddd9ce,#c5cfcb);border-radius:2px}
 .grid-mini{width:104px;grid-template-columns:1fr 1fr;padding-top:26px}
 .strip-mini{width:53px;grid-template-rows:repeat(4,1fr);padding:7px 5px 16px}
+.a-mini{width:104px;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;padding:8px}
+.b-mini,.three-mini{width:104px;grid-template-columns:1.2fr .8fr}
+.b-mini{grid-template-rows:repeat(4,1fr)}
+.three-mini{grid-template-rows:repeat(3,1fr)}
+.b-mini i,.three-mini i{grid-column:1;border-radius:5px}
+.six-mini{width:116px;grid-template-columns:1.15fr .85fr;grid-template-rows:repeat(4,1fr);padding:8px}
+.six-mini i{border-radius:4px}
+.six-mini i:nth-child(5){grid-column:2;grid-row:1 / span 2}
+.six-mini i:nth-child(6){grid-column:2;grid-row:3 / span 2}
 .muted{color:#77786f;font-size:14px}
 .batch{display:block;background:#f5f4f0;border:1px dashed #c4c5bb;text-align:center;padding:14px;border-radius:12px;margin:16px 0}
 .batch input,.slot input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.fields{display:grid;grid-template-columns:1.4fr .8fr auto;gap:12px;margin-top:8px}
+.fields{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px}
+.paper-ink{flex-direction:row;align-items:center;gap:10px;width:max-content;margin-top:14px}
 .paper-modes{display:flex;gap:8px;margin-top:14px}
 .paper-modes button{flex:1;border:1px solid #d9d4cb;background:#fff}
 .paper-modes button.on{background:#344b3e;color:#fff;border-color:#344b3e}
@@ -50,8 +60,19 @@ label.field input[type=text]{border:1px solid #e0dcd4;border-radius:10px;padding
 .date-line{display:flex;align-items:center;gap:8px}
 .date-line input[type=checkbox]{width:18px;height:18px;margin:0;flex:none}
 .date-line input[type=text]{flex:1;min-width:0}
+.sticker-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.sticker-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sticker-chip{width:54px;height:54px;padding:3px;border-radius:10px;border:1px solid #e0dcd4;background:
+  linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),
+  linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);
+  background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;background-color:#fff}
+.sticker-chip.on{outline:2px solid #344b3e}
+.sticker-chip img{width:100%;height:100%;object-fit:contain}
+canvas#output.movable{touch-action:none;cursor:grab}
 label.field input[type=color],label.field select{border:1px solid #e0dcd4;border-radius:10px;height:42px;padding:4px 8px;background:#fff;width:100%;color:inherit}
+label.field input.ink{width:36px;height:36px;min-width:36px;padding:2px;border-radius:8px;flex:none}
 .slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.slots[data-cols="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 .slot{position:relative;border:1px solid #deded6;border-radius:12px;overflow:hidden;cursor:pointer;background:#f4f2ed;min-height:180px;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center}
 .slot img{width:100%;height:180px;max-width:100%;object-fit:cover;display:block}
 .slot .number{position:absolute;top:8px;left:8px;background:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;font-size:13px;z-index:1}
@@ -82,7 +103,7 @@ canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px 
  .header-note{display:none}
  .intro{padding:28px 0 8px}
  .panel{padding:18px}
- .slots{grid-template-columns:1fr 1fr}
+ .slots,.slots[data-cols]{grid-template-columns:1fr 1fr}
  .slot,.slot img{height:180px}
  .fields{grid-template-columns:1fr}
  .template{padding:16px 8px}
@@ -94,12 +115,12 @@ canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px 
 <main>
 <header>
   <div class="brand">▦ <span>四格拍贴</span></div>
-  <span class="header-note">4 张照片 · 1 张拍贴 · 下载时可记到后台</span>
+  <span class="header-note">多种宫格 · 1 张拍贴 · 下载时可记到后台</span>
 </header>
 <div class="intro">
   <p class="eyebrow">把一段时光留下来</p>
-  <h1>四张照片，一张拍贴。</h1>
-  <p>选版式，放入照片或打开摄像头连拍。裁切在浏览器里完成。下载时，如果这个站点开着记录后台，会保存合成图、生成时间和访问 IP。</p>
+  <h1>选一种宫格，做成一张拍贴。</h1>
+  <p>版式只决定照片格子的位置。放入照片或打开摄像头连拍，裁切在浏览器里完成。下载时，如果这个站点开着记录后台，会保存合成图、生成时间和访问 IP。</p>
 </div>
 
 <section class="panel">
@@ -113,21 +134,39 @@ canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px 
       <div class="mini strip-mini"><i></i><i></i><i></i><i></i></div>
       <strong>竖条</strong><span>四张自上而下，侧边小字</span>
     </button>
+    <button class="template" data-layout="a" type="button" aria-pressed="false">
+      <div class="mini a-mini"><i></i><i></i><i></i><i></i></div>
+      <strong>四宫格-a</strong><span>四张大图，细边铺满</span>
+    </button>
+    <button class="template" data-layout="b" type="button" aria-pressed="false">
+      <div class="mini b-mini"><i></i><i></i><i></i><i></i></div>
+      <strong>四宫格-b</strong><span>左侧四张横图</span>
+    </button>
+    <button class="template" data-layout="six" type="button" aria-pressed="false">
+      <div class="mini six-mini"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <strong>六宫格</strong><span>左边四张，右边两张</span>
+    </button>
+    <button class="template" data-layout="three" type="button" aria-pressed="false">
+      <div class="mini three-mini"><i></i><i></i><i></i></div>
+      <strong>三宫格</strong><span>左侧三张横图</span>
+    </button>
   </div>
 </section>
 
 <section class="panel">
-  <div class="section-title"><span class="step">02</span><h2>放入四张照片</h2></div>
-  <p class="muted">按 1–4 排列。每张照片右下角可以自己选裁剪区域。拖左上角数字可以交换顺序。</p>
-  <label class="batch">＋ 一次选四张<input id="batch" type="file" accept="image/*" multiple></label>
+  <div class="section-title"><span class="step">02</span><h2 id="photoHeading">放入四张照片</h2></div>
+  <p class="muted">按序号排列。每张照片可以自己选裁剪区域。拖左上角数字可以交换顺序。</p>
+  <label class="batch">＋ 一次选 <span id="batchCount">4</span> 张<input id="batch" type="file" accept="image/*" multiple></label>
   <div class="slots" id="slots"></div>
   <div class="fields">
-    <label class="field">标题（田字格顶部 / 竖条侧边）<input id="title" type="text" maxlength="24" value="Haru film"></label>
-    <label class="field">日期
-      <span class="date-line"><input id="showDate" type="checkbox" checked><input id="date" type="text" maxlength="24" placeholder="留空则用今天"></span>
+    <label class="field">标题（田字格顶部 / 竖条侧边）
+      <span class="date-line"><input id="title" type="text" maxlength="24" value="xx foto"><input id="titleColor" class="ink" type="color" value="#161616" aria-label="标题颜色" title="标题颜色"></span>
     </label>
-    <label class="field" id="solidField">相纸颜色<input id="paper" type="color" value="#ffffff"></label>
+    <label class="field">日期
+      <span class="date-line"><input id="showDate" type="checkbox" checked aria-label="显示日期"><input id="date" type="text" maxlength="24" placeholder="留空则用今天"><input id="dateColor" class="ink" type="color" value="#6d6a62" aria-label="日期颜色" title="日期颜色"></span>
+    </label>
   </div>
+  <label class="field paper-ink" id="solidField">相纸颜色<input id="paper" class="ink" type="color" value="#ffffff"></label>
   <div class="paper-modes" role="group" aria-label="相纸样式">
     <button type="button" id="modeSolid" class="on" aria-pressed="true">纯色</button>
     <button type="button" id="modeGrad" aria-pressed="false">渐变</button>
@@ -156,6 +195,14 @@ canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px 
     </div>
     <p class="muted">比例和当前相纸不一致，或图片大于相纸时，会先裁剪再铺上。</p>
   </div>
+  <div class="sticker-row">
+    <button class="ghost" id="stickerPick" type="button">上传贴纸</button>
+    <button class="ghost" id="stickerClear" type="button" hidden>清除全部贴纸</button>
+    <label class="field" id="stickerSizeField" hidden>贴纸大小<input id="stickerSize" type="range" min="0.35" max="2.4" step="0.05" value="1"></label>
+    <input id="stickerFile" type="file" accept="image/*" hidden>
+  </div>
+  <div class="sticker-list" id="stickerList"></div>
+  <p class="muted">贴纸盖在照片上面。生成后，在预览上按住贴纸拖动。</p>
   <p id="status" role="status"></p>
   <div class="actions">
     <button class="ghost" id="shoot" type="button">打开摄像头连拍</button>
@@ -199,7 +246,7 @@ canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px 
 
 <script>
 const $ = id => document.getElementById(id);
-const items = [null, null, null, null];
+const items = [null, null, null, null, null, null];
 let kind = 'grid';
 let outputBlob = null;
 let landmarkerPromise = null;
@@ -219,15 +266,57 @@ function landmarker() {
 }
 
 function say(text) { $('status').textContent = text; }
-function filled() { return items.filter(Boolean).length; }
+function filled() {
+  return items.slice(0, count()).filter(Boolean).length;
+}
 function update() { $('make').disabled = false; }
+function count() { return layoutFor(kind).slots.length; }
+function syncChrome() {
+  const n = count();
+  $('photoHeading').textContent = '放入' + n + '张照片';
+  $('batchCount').textContent = String(n);
+  const cards = $('slots').children;
+  for (let i = 0; i < cards.length; i++) cards[i].hidden = i >= n;
+  $('slots').dataset.cols = n === 4 ? '4' : '3';
+}
 
 function layoutFor(name) {
   if (name === 'strip') {
-    return { width: 600, height: 1880, slots: [0, 1, 2, 3].map(i => ({ x: 35, y: 30 + i * 440, w: 530, h: 422 })) };
+    return { width: 600, height: 1880, radius: 0, slots: [0, 1, 2, 3].map(i => ({ x: 35, y: 30 + i * 440, w: 530, h: 422 })) };
+  }
+  if (name === 'a') {
+    return {
+      width: 1200, height: 1800, radius: 0,
+      slots: [
+        { x: 37, y: 46, w: 544, h: 847 }, { x: 622, y: 46, w: 542, h: 850 },
+        { x: 37, y: 921, w: 544, h: 850 }, { x: 622, y: 921, w: 542, h: 850 }
+      ]
+    };
+  }
+  if (name === 'b') {
+    return {
+      width: 1200, height: 1800, radius: 36,
+      slots: [152, 549, 945, 1342].map(y => ({ x: 84, y, w: 465, h: 347 }))
+    };
+  }
+  if (name === 'six') {
+    return {
+      width: 1200, height: 1800, radius: 20,
+      slots: [
+        { x: 82, y: 140, w: 458, h: 340 }, { x: 82, y: 489, w: 458, h: 341 },
+        { x: 82, y: 839, w: 458, h: 341 }, { x: 82, y: 1189, w: 458, h: 341 },
+        { x: 675, y: 96, w: 425, h: 574 }, { x: 675, y: 963, w: 421, h: 573 }
+      ]
+    };
+  }
+  if (name === 'three') {
+    return {
+      width: 1200, height: 1800, radius: 36,
+      slots: [124, 548, 974].map(y => ({ x: 84, y, w: 510, h: 389 }))
+    };
   }
   return {
-    width: 1200, height: 1680,
+    width: 1200, height: 1680, radius: 0,
     slots: [
       { x: 120, y: 220, w: 460, h: 620 }, { x: 620, y: 220, w: 460, h: 620 },
       { x: 120, y: 870, w: 460, h: 620 }, { x: 620, y: 870, w: 460, h: 620 }
@@ -323,11 +412,12 @@ async function put(file, index) {
   paintSlot(index);
   outputBlob = null;
   update();
-  say(filled() === 4 ? '四张都齐了，可以生成。' : '已放入 ' + filled() + ' / 4');
+  const n = count();
+  say(filled() === n ? n + '张都齐了，可以生成。' : '已放入 ' + filled() + ' / ' + n);
   items[index].focus = await focusOf(canvas);
 }
 
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < items.length; i++) {
   const card = document.createElement('div');
   card.className = 'slot';
   card.innerHTML = '<span class="number">' + (i + 1) + '</span><button type="button" class="x" hidden aria-label="移除">×</button><button type="button" class="crop-btn" hidden>裁剪</button><span class="add">＋<br>添加照片</span><input type="file" accept="image/*" aria-label="照片 ' + (i + 1) + '">';
@@ -384,10 +474,12 @@ for (let i = 0; i < 4; i++) {
   });
   $('slots').append(card);
 }
+syncChrome();
 
 $('batch').onchange = event => {
-  const files = [...event.target.files].slice(0, 4);
-  if (event.target.files.length > 4) say('多于四张，只取前四张。');
+  const n = count();
+  const files = [...event.target.files].slice(0, n);
+  if (event.target.files.length > n) say('多于' + n + '张，只取前' + n + '张。');
   event.target.value = '';
   (async () => {
     for (let i = 0; i < files.length; i++) {
@@ -405,7 +497,8 @@ for (const btn of document.querySelectorAll('.template')) {
       other.setAttribute('aria-pressed', String(on));
     }
     outputBlob = null;
-    for (let i = 0; i < 4; i++) if (items[i]) paintSlot(i);
+    syncChrome();
+    for (let i = 0; i < items.length; i++) if (items[i] && i < count()) paintSlot(i);
     if (paper.mode === 'photo' && paper.source && needsCrop(paper.image || paper.source, layoutFor(kind))) {
       openPaperCrop(paper.source);
     }
@@ -417,6 +510,8 @@ function rerenderIfShown() {
 }
 $('title').oninput = rerenderIfShown;
 $('date').oninput = rerenderIfShown;
+$('titleColor').oninput = rerenderIfShown;
+$('dateColor').oninput = rerenderIfShown;
 $('paper').oninput = rerenderIfShown;
 $('gradA').oninput = rerenderIfShown;
 $('gradB').oninput = rerenderIfShown;
@@ -712,30 +807,36 @@ function paintPaper(ctx, layout) {
 }
 
 function drawFrame(ctx, name, layout) {
-  const title = ($('title').value || 'Haru film').trim();
+  const title = ($('title').value || 'xx foto').trim();
   const showDate = $('showDate').checked;
   const date = showDate ? ($('date').value || new Date().toLocaleDateString('zh-CN')).trim() : '';
   paintPaper(ctx, layout);
-  ctx.fillStyle = '#161616';
+  const titleColor = $('titleColor').value || '#161616';
+  const dateColor = $('dateColor').value || '#6d6a62';
+  ctx.fillStyle = titleColor;
   if (name === 'grid') {
     ctx.font = 'bold 64px "Iowan Old Style","Songti SC",Georgia,serif';
     ctx.textAlign = 'center';
     ctx.fillText(title, layout.width / 2, 128);
     ctx.font = '28px "Songti SC",Georgia,serif';
-    ctx.fillStyle = '#6d6a62';
+    ctx.fillStyle = dateColor;
     if (showDate) ctx.fillText(date, layout.width / 2, 178);
-  } else {
+    return;
+  }
+  if (name === 'strip') {
     ctx.save();
     ctx.translate(582, 1860);
     ctx.rotate(-Math.PI / 2);
     ctx.font = 'bold 15px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#161616';
+    ctx.fillStyle = titleColor;
     ctx.fillText(title, 40, 0);
     ctx.font = '13px sans-serif';
-    ctx.fillStyle = '#444';
+    ctx.fillStyle = dateColor;
     if (showDate) ctx.fillText(date, 520, 0);
+    ctx.fillStyle = titleColor;
     ctx.fillText(title, 980, 0);
+    ctx.fillStyle = dateColor;
     if (showDate) ctx.fillText(date, 1400, 0);
     ctx.restore();
     ctx.fillStyle = '#161616';
@@ -746,7 +847,48 @@ function drawFrame(ctx, name, layout) {
       ctx.lineTo(26, 70 + i * 440);
       ctx.fill();
     }
+    return;
   }
+  const right = Math.max(...layout.slots.map(slot => slot.x + slot.w));
+  const bottom = Math.max(...layout.slots.map(slot => slot.y + slot.h));
+  ctx.textAlign = 'left';
+  if (name === 'a') {
+    ctx.font = 'bold 26px "Iowan Old Style","Songti SC",Georgia,serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, layout.width / 2, 32);
+    ctx.font = '18px "Songti SC",Georgia,serif';
+    ctx.fillStyle = dateColor;
+    if (showDate) ctx.fillText(date, layout.width / 2, layout.height - 16);
+    return;
+  }
+  if (name === 'six') {
+    ctx.font = 'bold 42px "Iowan Old Style","Songti SC",Georgia,serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, layout.width / 2, bottom + 78);
+    ctx.font = '26px "Songti SC",Georgia,serif';
+    ctx.fillStyle = dateColor;
+    if (showDate) ctx.fillText(date, layout.width / 2, bottom + 124);
+    return;
+  }
+  const x = right + 48;
+  ctx.font = 'bold 48px "Iowan Old Style","Songti SC",Georgia,serif';
+  wrapText(ctx, title, x, 280, layout.width - x - 48, 62);
+  ctx.font = '28px "Songti SC",Georgia,serif';
+  ctx.fillStyle = dateColor;
+  if (showDate) ctx.fillText(date, x, 460);
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  let line = '';
+  let top = y;
+  for (const char of text) {
+    const next = line + char;
+    if (line && ctx.measureText(next).width > maxWidth) {
+      ctx.fillText(line, x, top);
+      line = char;
+      top += lineHeight;
+    } else line = next;
+  }
+  if (line) ctx.fillText(line, x, top);
 }
 
 async function render() {
@@ -761,22 +903,199 @@ async function render() {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   drawFrame(ctx, kind, layout);
-  items.forEach((item, index) => {
-    if (!item) return;
-    const slot = layout.slots[index];
-    const frame = item.crop && aspectClose(item.crop, slot)
-      ? item.crop
-      : cropFor(item.canvas.width, item.canvas.height, slot, item.focus);
-    ctx.drawImage(item.canvas, frame.x, frame.y, frame.w, frame.h, slot.x, slot.y, slot.w, slot.h);
+  layout.slots.forEach((slot, index) => {
+    const item = items[index];
+    ctx.save();
+    traceSlot(ctx, slot, layout.radius);
+    ctx.clip();
+    if (!item) {
+      ctx.fillStyle = 'rgba(0,0,0,0.045)';
+      ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+    } else {
+      const frame = item.crop && aspectClose(item.crop, slot)
+        ? item.crop
+        : cropFor(item.canvas.width, item.canvas.height, slot, item.focus);
+      ctx.drawImage(item.canvas, frame.x, frame.y, frame.w, frame.h, slot.x, slot.y, slot.w, slot.h);
+    }
+    ctx.restore();
   });
-  outputBlob = await new Promise((ok, fail) => {
-    canvas.toBlob(blob => blob ? ok(blob) : fail(new Error('导出失败')), 'image/png');
-  });
+  baseCanvas = document.createElement('canvas');
+  baseCanvas.width = canvas.width;
+  baseCanvas.height = canvas.height;
+  baseCanvas.getContext('2d').drawImage(canvas, 0, 0);
+  await exportComposite(false);
   $('result').hidden = false;
+  $('output').classList.toggle('movable', stickers.length > 0);
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  say('好了。可以下载；改标题、日期或版式会马上重排。');
+  say(stickers.length ? '好了。贴纸在最上层，按住它可以拖动。' : '好了。可以下载；改标题、日期或版式会马上重排。');
   update();
 }
+function traceSlot(ctx, slot, radius) {
+  const r = Math.min(radius || 0, slot.w / 2, slot.h / 2);
+  ctx.beginPath();
+  if (r > 0 && ctx.roundRect) ctx.roundRect(slot.x, slot.y, slot.w, slot.h, r);
+  else ctx.rect(slot.x, slot.y, slot.w, slot.h);
+}
+function nextEmpty() {
+  const n = count();
+  for (let i = 0; i < n; i++) if (!items[i]) return i;
+  return -1;
+}
+function stickerBox(sticker, layout) {
+  const target = Math.min(layout.width, layout.height) * 0.22 * sticker.scale;
+  const ratio = sticker.canvas.width / sticker.canvas.height;
+  const w = ratio >= 1 ? target : target * ratio;
+  const h = ratio >= 1 ? target / ratio : target;
+  return { x: sticker.x * layout.width - w / 2, y: sticker.y * layout.height - h / 2, w, h };
+}
+function paintStickers(ctx, layout, outline) {
+  stickers.forEach((sticker, index) => {
+    const box = stickerBox(sticker, layout);
+    ctx.drawImage(sticker.canvas, box.x, box.y, box.w, box.h);
+    if (outline && index === selectedSticker) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(52,75,62,.95)';
+      ctx.lineWidth = Math.max(3, layout.width / 280);
+      ctx.setLineDash([12, 8]);
+      ctx.strokeRect(box.x, box.y, box.w, box.h);
+      ctx.restore();
+    }
+  });
+}
+function stamp(outline) {
+  const canvas = $('output');
+  if (!baseCanvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(baseCanvas, 0, 0);
+  paintStickers(ctx, layoutFor(kind), outline);
+}
+async function exportComposite(outline) {
+  stamp(outline);
+  outputBlob = await new Promise((ok, fail) => {
+    $('output').toBlob(blob => blob ? ok(blob) : fail(new Error('导出失败')), 'image/png');
+  });
+}
+function syncStickerUi() {
+  const list = $('stickerList');
+  list.replaceChildren();
+  stickers.forEach((sticker, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'sticker-chip' + (index === selectedSticker ? ' on' : '');
+    button.title = '选中这张贴纸';
+    const img = document.createElement('img');
+    img.alt = '贴纸 ' + (index + 1);
+    img.src = sticker.canvas.toDataURL('image/png');
+    button.append(img);
+    button.onclick = () => {
+      selectedSticker = index;
+      $('stickerSize').value = String(sticker.scale);
+      syncStickerUi();
+      if (!$('result').hidden) stamp(true);
+    };
+    list.append(button);
+  });
+  $('stickerClear').hidden = !stickers.length;
+  $('stickerSizeField').hidden = selectedSticker < 0;
+  $('output').classList.toggle('movable', stickers.length > 0 && !$('result').hidden);
+}
+async function loadSticker(file) {
+  const bitmap = await createImageBitmap(file);
+  const limit = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * limit));
+  canvas.height = Math.max(1, Math.round(bitmap.height * limit));
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas;
+}
+function canvasPoint(event) {
+  const canvas = $('output');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * canvas.width / rect.width,
+    y: (event.clientY - rect.top) * canvas.height / rect.height
+  };
+}
+function hitSticker(x, y) {
+  const layout = layoutFor(kind);
+  for (let index = stickers.length - 1; index >= 0; index--) {
+    const box = stickerBox(stickers[index], layout);
+    if (x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h) return index;
+  }
+  return -1;
+}
+const stickers = [];
+let selectedSticker = -1;
+let baseCanvas = null;
+let stickerDrag = null;
+$('stickerPick').onclick = () => $('stickerFile').click();
+$('stickerFile').onchange = event => {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  if (stickers.length >= 12) { say('最多 12 张贴纸。'); return; }
+  loadSticker(file).then(canvas => {
+    stickers.push({
+      canvas,
+      x: Math.min(0.82, 0.38 + stickers.length * 0.06),
+      y: Math.min(0.72, 0.36 + stickers.length * 0.05),
+      scale: 1
+    });
+    selectedSticker = stickers.length - 1;
+    $('stickerSize').value = '1';
+    syncStickerUi();
+    if ($('result').hidden) {
+      say('贴纸已放上。生成后会出现在最上层，可以拖动。');
+      return;
+    }
+    return exportComposite(false).then(() => say('贴纸已盖在最上层，按住它可以拖动。'));
+  }).catch(error => say(error.message || '贴纸读取失败'));
+};
+$('stickerClear').onclick = () => {
+  stickers.length = 0;
+  selectedSticker = -1;
+  syncStickerUi();
+  if (!$('result').hidden) exportComposite(false).catch(error => say(error.message || '生成失败'));
+};
+$('stickerSize').oninput = () => {
+  if (selectedSticker < 0) return;
+  stickers[selectedSticker].scale = Number($('stickerSize').value);
+  if (!$('result').hidden) exportComposite(false).catch(error => say(error.message || '生成失败'));
+};
+$('output').addEventListener('pointerdown', event => {
+  if (event.button !== 0 || $('result').hidden || !stickers.length) return;
+  const point = canvasPoint(event);
+  const index = hitSticker(point.x, point.y);
+  if (index < 0) return;
+  selectedSticker = index;
+  const sticker = stickers[index];
+  stickerDrag = {
+    index,
+    dx: point.x - sticker.x * $('output').width,
+    dy: point.y - sticker.y * $('output').height
+  };
+  $('stickerSize').value = String(sticker.scale);
+  event.currentTarget.setPointerCapture(event.pointerId);
+  syncStickerUi();
+  stamp(true);
+});
+$('output').addEventListener('pointermove', event => {
+  if (!stickerDrag) return;
+  const point = canvasPoint(event);
+  const sticker = stickers[stickerDrag.index];
+  sticker.x = Math.min(1.15, Math.max(-0.15, (point.x - stickerDrag.dx) / $('output').width));
+  sticker.y = Math.min(1.15, Math.max(-0.15, (point.y - stickerDrag.dy) / $('output').height));
+  stamp(true);
+});
+function endStickerDrag() {
+  if (!stickerDrag) return;
+  stickerDrag = null;
+  exportComposite(false).catch(error => say(error.message || '生成失败'));
+}
+$('output').addEventListener('pointerup', endStickerDrag);
+$('output').addEventListener('pointercancel', endStickerDrag);
 
 $('make').onclick = () => render().catch(error => { say(error.message || '生成失败'); update(); });
 $('showDate').onchange = () => rerenderIfShown();
@@ -822,7 +1141,7 @@ $('timerToggle').onclick = () => {
   $('timerToggle').textContent = '倒计时：' + (useTimer ? '开（3 秒）' : '关');
 };
 $('shoot').onclick = async () => {
-  nextShot = items.findIndex(item => !item);
+  nextShot = nextEmpty();
   if (nextShot < 0) nextShot = 0;
   $('camStep').textContent = String(nextShot + 1);
   $('cam').hidden = false;
@@ -832,7 +1151,7 @@ $('shoot').onclick = async () => {
       audio: false
     });
     $('video').srcObject = stream;
-    $('camNote').textContent = '每按一次快门填入下一个空位，拍满四张会自动关闭。预览是镜像，成片会转正。';
+    $('camNote').textContent = '每按一次快门填入下一个空位，拍满' + count() + '张会自动关闭。预览是镜像，成片会转正。';
   } catch (_) {
     $('camNote').textContent = '没有拿到摄像头权限，可以改用上传照片。';
   }
@@ -847,10 +1166,10 @@ async function grab() {
   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
   const blob = await new Promise(ok => canvas.toBlob(ok, 'image/jpeg', 0.92));
   await put(new File([blob], 'shot.jpg', { type: 'image/jpeg' }), nextShot);
-  nextShot = items.findIndex(item => !item);
+  nextShot = nextEmpty();
   if (nextShot < 0) {
     stopCam();
-    say('四张都拍好了。');
+    say(count() + '张都拍好了。');
     return;
   }
   $('camStep').textContent = String(nextShot + 1);
