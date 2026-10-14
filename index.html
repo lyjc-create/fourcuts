@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f7f4ef">
+<title>四格拍贴</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f4ef;color:#252723;font-family:system-ui,"PingFang SC","Noto Sans SC",sans-serif;line-height:1.7}
+button,input{font:inherit}
+button,.batch{cursor:pointer}
+button{border:0;border-radius:12px;padding:12px 20px;background:#eeeae3;color:inherit;touch-action:manipulation}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.batch:focus-within,input:focus-visible{outline:3px solid #a87945;outline-offset:3px}
+[hidden]{display:none!important}
+main{max-width:960px;margin:auto;padding:0 24px 72px}
+header{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid #dedbd4}
+.brand{display:flex;gap:12px;align-items:center;font-weight:750;font-size:23px}
+.header-note,.eyebrow{font-size:13px;color:#7d796f}
+.intro{padding:42px 0 18px}
+.intro h1{font-size:clamp(28px,4vw,42px);line-height:1.35;margin:8px 0}
+.intro p{color:#77756d;margin:0}
+.panel{background:#fff;border:1px solid #e4e0d9;border-radius:20px;padding:28px;margin-top:22px}
+.section-title{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+h2{font-size:21px;margin:0}
+.step{font-size:13px;border:1px solid #dcd8d0;border-radius:50%;width:35px;height:35px;display:grid;place-items:center;flex:none}
+.templates{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.template{background:#f8f7f4;border:2px solid transparent;display:flex;align-items:center;flex-direction:column;padding:24px}
+.template.selected{border-color:#3c5146;background:#f2f5f1}
+.template strong{margin-top:14px}
+.template span{font-size:13px;color:#787b72}
+.mini{display:grid;background:white;box-shadow:0 3px 12px #0002;padding:10px;gap:5px;height:140px}
+.mini i{background:linear-gradient(145deg,#ddd9ce,#c5cfcb);border-radius:2px}
+.grid-mini{width:104px;grid-template-columns:1fr 1fr;padding-top:26px}
+.strip-mini{width:53px;grid-template-rows:repeat(4,1fr);padding:7px 5px 16px}
+.muted{color:#77786f;font-size:14px}
+.batch{display:block;background:#f5f4f0;border:1px dashed #c4c5bb;text-align:center;padding:14px;border-radius:12px;margin:16px 0}
+.batch input,.slot input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.fields{display:grid;grid-template-columns:1.4fr .8fr auto;gap:12px;margin-top:8px}
+.paper-modes{display:flex;gap:8px;margin-top:14px}
+.paper-modes button{flex:1;border:1px solid #d9d4cb;background:#fff}
+.paper-modes button.on{background:#344b3e;color:#fff;border-color:#344b3e}
+.paper-panel{margin-top:12px}
+.grad-row,.photo-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.grad-row label,.photo-row{font-size:13px;color:#6e6a60}
+.swatch{width:88px;height:42px;border-radius:10px;border:1px solid #e0dcd4;object-fit:cover;background:#f4f2ed}
+label.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#6e6a60}
+label.field input[type=text]{border:1px solid #e0dcd4;border-radius:10px;padding:10px 12px;background:#faf9f6;color:inherit}
+.date-line{display:flex;align-items:center;gap:8px}
+.date-line input[type=checkbox]{width:18px;height:18px;margin:0;flex:none}
+.date-line input[type=text]{flex:1;min-width:0}
+label.field input[type=color],label.field select{border:1px solid #e0dcd4;border-radius:10px;height:42px;padding:4px 8px;background:#fff;width:100%;color:inherit}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.slot{position:relative;border:1px solid #deded6;border-radius:12px;overflow:hidden;cursor:pointer;background:#f4f2ed;min-height:180px;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center}
+.slot img{width:100%;height:180px;max-width:100%;object-fit:cover;display:block}
+.slot .number{position:absolute;top:8px;left:8px;background:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;font-size:13px;z-index:1}
+.slot .add{font-size:13px;color:#777}
+.slot .x{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:#fff;padding:0;line-height:28px;z-index:2}
+.slot .crop-btn{position:absolute;left:8px;bottom:8px;z-index:2;background:#fff;border:1px solid #d9d4cb;border-radius:999px;padding:3px 9px;font-size:12px;line-height:1.4}
+.slot.drag{outline:2px dashed #3c5146}
+.actions{display:flex;gap:10px;margin-top:16px}
+.actions .primary{flex:1}
+.ghost{background:#fff;border:1px solid #d9d4cb}
+.primary{background:#344b3e;color:#fff;font-weight:650;padding:15px 20px}
+.quiet{background:transparent;color:#707166;font-size:14px;padding:8px 4px}
+.paper{background:#efede7;padding:25px;border-radius:12px;margin:8px 0 20px;display:flex;justify-content:center}
+canvas#output{max-width:100%;max-height:850px;height:auto;box-shadow:0 8px 25px #0002;background:#fff}
+#status{font-size:14px;min-height:1.6em;color:#726c60;margin:8px 0}
+.modal{position:fixed;inset:0;background:#1c1b18cc;display:grid;place-items:center;z-index:5;padding:20px}
+.sheet{width:min(520px,100%);background:#fff;border-radius:20px;padding:18px}
+.sheet video{width:100%;border-radius:12px;background:#111;max-height:52vh;object-fit:cover;transform:scaleX(-1)}
+.sheet.wide{width:min(640px,100%)}
+#cropModal .sheet{width:min(380px,100%)}
+#cropStage{display:block;margin:0 auto;background:#1c1b18;border-radius:12px;touch-action:none;cursor:grab}
+#cropStage:active{cursor:grabbing}
+.zoom-row{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:13px;color:#6e6a60}
+.zoom-row input{flex:1}
+.count{font-size:64px;text-align:center;margin:8px 0;font-variant-numeric:tabular-nums;min-height:1.1em}
+@media(max-width:700px){
+ main{padding:0 16px 40px}
+ .header-note{display:none}
+ .intro{padding:28px 0 8px}
+ .panel{padding:18px}
+ .slots{grid-template-columns:1fr 1fr}
+ .slot,.slot img{height:180px}
+ .fields{grid-template-columns:1fr}
+ .template{padding:16px 8px}
+ .paper{padding:12px}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand">▦ <span>四格拍贴</span></div>
+  <span class="header-note">4 张照片 · 1 张拍贴 · 下载时可记到后台</span>
+</header>
+<div class="intro">
+  <p class="eyebrow">把一段时光留下来</p>
+  <h1>四张照片，一张拍贴。</h1>
+  <p>选版式，放入照片或打开摄像头连拍。裁切在浏览器里完成。下载时，如果这个站点开着记录后台，会保存合成图、生成时间和访问 IP。</p>
+</div>
+
+<section class="panel">
+  <div class="section-title"><span class="step">01</span><h2>选择版式</h2></div>
+  <div class="templates">
+    <button class="template selected" data-layout="grid" type="button" aria-pressed="true">
+      <div class="mini grid-mini"><i></i><i></i><i></i><i></i></div>
+      <strong>田字格</strong><span>四张大图，顶部一行标题</span>
+    </button>
+    <button class="template" data-layout="strip" type="button" aria-pressed="false">
+      <div class="mini strip-mini"><i></i><i></i><i></i><i></i></div>
+      <strong>竖条</strong><span>四张自上而下，侧边小字</span>
+    </button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-title"><span class="step">02</span><h2>放入四张照片</h2></div>
+  <p class="muted">按 1–4 排列。每张照片右下角可以自己选裁剪区域。拖左上角数字可以交换顺序。</p>
+  <label class="batch">＋ 一次选四张<input id="batch" type="file" accept="image/*" multiple></label>
+  <div class="slots" id="slots"></div>
+  <div class="fields">
+    <label class="field">标题（田字格顶部 / 竖条侧边）<input id="title" type="text" maxlength="24" value="Haru film"></label>
+    <label class="field">日期
+      <span class="date-line"><input id="showDate" type="checkbox" checked><input id="date" type="text" maxlength="24" placeholder="留空则用今天"></span>
+    </label>
+    <label class="field" id="solidField">相纸颜色<input id="paper" type="color" value="#ffffff"></label>
+  </div>
+  <div class="paper-modes" role="group" aria-label="相纸样式">
+    <button type="button" id="modeSolid" class="on" aria-pressed="true">纯色</button>
+    <button type="button" id="modeGrad" aria-pressed="false">渐变</button>
+    <button type="button" id="modePhoto" aria-pressed="false">上传相纸</button>
+  </div>
+  <div class="paper-panel" id="gradPanel" hidden>
+    <div class="grad-row">
+      <label class="field">起始色<input id="gradA" type="color" value="#ffffff"></label>
+      <label class="field">结束色<input id="gradB" type="color" value="#d7c4a3"></label>
+      <label class="field">方向
+        <select id="gradDir">
+          <option value="down">上到下</option>
+          <option value="right">左到右</option>
+          <option value="diag">对角</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div class="paper-panel" id="photoPanel" hidden>
+    <div class="photo-row">
+      <img id="paperSwatch" class="swatch" alt="" hidden>
+      <button class="ghost" id="paperPick" type="button">上传图片当相纸</button>
+      <button class="ghost" id="paperRecrop" type="button" hidden>重新裁剪</button>
+      <button class="ghost" id="paperClear" type="button" hidden>清除</button>
+      <input id="paperFile" type="file" accept="image/*" hidden>
+    </div>
+    <p class="muted">比例和当前相纸不一致，或图片大于相纸时，会先裁剪再铺上。</p>
+  </div>
+  <p id="status" role="status"></p>
+  <div class="actions">
+    <button class="ghost" id="shoot" type="button">打开摄像头连拍</button>
+    <button class="primary" id="make" type="button">生成拍贴</button>
+  </div>
+</section>
+
+<section class="panel" id="result" hidden>
+  <div class="section-title"><span class="step">03</span><h2>你的拍贴</h2></div>
+  <div class="paper"><canvas id="output"></canvas></div>
+  <button class="primary" id="download" type="button">下载 PNG</button>
+  <p class="muted">下载时，若站点开着记录后台，会保存这张合成图、时间和访问 IP。手机上如果新开了一页图片，长按即可保存。</p>
+</section>
+</main>
+
+<div class="modal" id="cropModal" hidden>
+  <div class="sheet wide">
+    <div class="section-title"><span class="step">裁</span><h2 id="cropTitle">裁成相纸</h2></div>
+    <p class="muted" id="cropHint">按住左键拖动，松开即停。缩放时格子大小不变，画面始终铺满。</p>
+    <canvas id="cropStage" width="560" height="420"></canvas>
+    <div class="zoom-row"><span>缩放</span><input id="cropZoom" type="range" min="1" max="4" step="0.01" value="1"></div>
+    <div class="actions">
+      <button class="ghost" id="cropCancel" type="button">取消</button>
+      <button class="primary" id="cropOk" type="button">用这块做相纸</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="cam" hidden>
+  <div class="sheet">
+    <div class="section-title"><span class="step" id="camStep">1</span><h2>连拍</h2></div>
+    <video id="video" playsinline autoplay muted></video>
+    <div class="count" id="count"></div>
+    <div class="actions">
+      <button class="ghost" id="camClose" type="button">取消</button>
+      <button class="primary" id="shutter" type="button">拍这一张</button>
+    </div>
+    <p class="muted" id="camNote">允许摄像头后，每按一次快门填入下一个空位。</p>
+    <button class="quiet" id="timerToggle" type="button">倒计时：关</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const items = [null, null, null, null];
+let kind = 'grid';
+let outputBlob = null;
+let landmarkerPromise = null;
+function landmarker() {
+  if (!landmarkerPromise) {
+    landmarkerPromise = (async () => {
+      const { FilesetResolver, FaceLandmarker } = await import('./assets/vision_bundle.mjs');
+      const files = await FilesetResolver.forVisionTasks('./assets/wasm');
+      return FaceLandmarker.createFromOptions(files, {
+        baseOptions: { modelAssetPath: './assets/face_landmarker.task', delegate: 'CPU' },
+        runningMode: 'IMAGE',
+        numFaces: 6
+      });
+    })().catch(error => { landmarkerPromise = null; throw error; });
+  }
+  return landmarkerPromise;
+}
+
+function say(text) { $('status').textContent = text; }
+function filled() { return items.filter(Boolean).length; }
+function update() { $('make').disabled = false; }
+
+function layoutFor(name) {
+  if (name === 'strip') {
+    return { width: 600, height: 1880, slots: [0, 1, 2, 3].map(i => ({ x: 35, y: 30 + i * 440, w: 530, h: 422 })) };
+  }
+  return {
+    width: 1200, height: 1680,
+    slots: [
+      { x: 120, y: 220, w: 460, h: 620 }, { x: 620, y: 220, w: 460, h: 620 },
+      { x: 120, y: 870, w: 460, h: 620 }, { x: 620, y: 870, w: 460, h: 620 }
+    ]
+  };
+}
+
+function cropFor(width, height, slot, focus) {
+  const scale = Math.max(slot.w / width, slot.h / height);
+  const w = slot.w / scale, h = slot.h / scale;
+  return {
+    x: Math.max(0, Math.min(width - w, focus.x * width - w / 2)),
+    y: Math.max(0, Math.min(height - h, focus.y * height - h / 2)),
+    w, h
+  };
+}
+
+async function loadFile(file) {
+  if (file.size > 40000000) throw new Error('图片超过 40MB');
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  if (!bmp.width || !bmp.height || bmp.width * bmp.height > 100000000) {
+    bmp.close();
+    throw new Error('无法读取这张图片，请换 JPG、PNG 或 WebP');
+  }
+  const ratio = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bmp.width * ratio);
+  canvas.height = Math.round(bmp.height * ratio);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close();
+  return canvas;
+}
+
+async function focusOf(canvas) {
+  const fallback = { x: 0.5, y: 0.46 };
+  try {
+    const model = await landmarker();
+    const faces = model.detect(canvas).faceLandmarks;
+    if (!faces || !faces.length) return fallback;
+    const points = faces.flat();
+    const xs = points.map(point => point.x);
+    const ys = points.map(point => point.y);
+    const left = Math.min(...xs), right = Math.max(...xs);
+    const top = Math.min(...ys), bottom = Math.max(...ys);
+    return {
+      x: (left + right) / 2,
+      y: Math.min(1, (top + bottom) / 2 + (bottom - top) * 0.4)
+    };
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function aspectClose(rect, slot) {
+  if (!rect || rect.w < 2 || rect.h < 2) return false;
+  const target = slot.w / slot.h;
+  return Math.abs(rect.w / rect.h - target) / target < 0.02;
+}
+function slotPreview(item, index) {
+  const slot = layoutFor(kind).slots[index];
+  if (!item.crop || !aspectClose(item.crop, slot)) return item.url;
+  const thumb = document.createElement('canvas');
+  thumb.width = 240;
+  thumb.height = Math.max(1, Math.round(240 * slot.h / slot.w));
+  const rect = item.crop;
+  thumb.getContext('2d').drawImage(item.canvas, rect.x, rect.y, rect.w, rect.h, 0, 0, thumb.width, thumb.height);
+  return thumb.toDataURL('image/jpeg', 0.72);
+}
+function paintSlot(index) {
+  const card = $('slots').children[index];
+  const old = card.querySelector('img');
+  if (old) old.remove();
+  const item = items[index];
+  card.querySelector('.add').hidden = !!item;
+  card.querySelector('.x').hidden = !item;
+  card.querySelector('.crop-btn').hidden = !item;
+  if (!item) return;
+  const img = document.createElement('img');
+  img.alt = '照片 ' + (index + 1);
+  img.src = slotPreview(item, index);
+  img.style.objectFit = 'cover';
+  card.prepend(img);
+}
+
+async function put(file, index) {
+  say('正在读取照片…');
+  const canvas = await loadFile(file);
+  if (items[index]) URL.revokeObjectURL(items[index].url);
+  items[index] = { canvas, url: URL.createObjectURL(file), focus: { x: 0.5, y: 0.46 } };
+  paintSlot(index);
+  outputBlob = null;
+  update();
+  say(filled() === 4 ? '四张都齐了，可以生成。' : '已放入 ' + filled() + ' / 4');
+  items[index].focus = await focusOf(canvas);
+}
+
+for (let i = 0; i < 4; i++) {
+  const card = document.createElement('div');
+  card.className = 'slot';
+  card.innerHTML = '<span class="number">' + (i + 1) + '</span><button type="button" class="x" hidden aria-label="移除">×</button><button type="button" class="crop-btn" hidden>裁剪</button><span class="add">＋<br>添加照片</span><input type="file" accept="image/*" aria-label="照片 ' + (i + 1) + '">';
+  const picker = card.querySelector('input');
+  picker.onchange = event => {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (file) put(file, i).catch(error => say(error.message || '读取失败'));
+  };
+  card.addEventListener('click', event => {
+    if (event.target.closest('.x, .number, .crop-btn')) return;
+    card.draggable = false;
+    picker.value = '';
+    picker.click();
+  });
+  card.querySelector('.crop-btn').addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    openSlotCrop(i);
+  });
+  card.querySelector('.x').addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (items[i]) URL.revokeObjectURL(items[i].url);
+    items[i] = null;
+    paintSlot(i);
+    outputBlob = null;
+    update();
+    say('');
+  });
+  card.querySelector('.number').addEventListener('pointerdown', event => {
+    card.draggable = true;
+    event.stopPropagation();
+  });
+  card.addEventListener('pointerdown', () => { card.draggable = false; });
+  card.addEventListener('dragstart', event => {
+    if (!items[i]) { event.preventDefault(); card.draggable = false; return; }
+    event.dataTransfer.setData('text/plain', String(i));
+    card.classList.add('drag');
+  });
+  card.addEventListener('dragend', () => { card.classList.remove('drag'); card.draggable = false; });
+  card.addEventListener('dragover', event => event.preventDefault());
+  card.addEventListener('drop', event => {
+    event.preventDefault();
+    const from = Number(event.dataTransfer.getData('text/plain'));
+    if (Number.isNaN(from) || from === i) return;
+    const tmp = items[from];
+    items[from] = items[i];
+    items[i] = tmp;
+    paintSlot(from);
+    paintSlot(i);
+    outputBlob = null;
+    update();
+  });
+  $('slots').append(card);
+}
+
+$('batch').onchange = event => {
+  const files = [...event.target.files].slice(0, 4);
+  if (event.target.files.length > 4) say('多于四张，只取前四张。');
+  event.target.value = '';
+  (async () => {
+    for (let i = 0; i < files.length; i++) {
+      try { await put(files[i], i); } catch (error) { say(error.message || '读取失败'); }
+    }
+  })();
+};
+
+for (const btn of document.querySelectorAll('.template')) {
+  btn.onclick = () => {
+    kind = btn.dataset.layout;
+    for (const other of document.querySelectorAll('.template')) {
+      const on = other === btn;
+      other.classList.toggle('selected', on);
+      other.setAttribute('aria-pressed', String(on));
+    }
+    outputBlob = null;
+    for (let i = 0; i < 4; i++) if (items[i]) paintSlot(i);
+    if (paper.mode === 'photo' && paper.source && needsCrop(paper.image || paper.source, layoutFor(kind))) {
+      openPaperCrop(paper.source);
+    }
+    if (!$('result').hidden) render().catch(error => say(error.message || '生成失败'));
+  };
+}
+function rerenderIfShown() {
+  if (!$('result').hidden) render().catch(error => say(error.message || '生成失败'));
+}
+$('title').oninput = rerenderIfShown;
+$('date').oninput = rerenderIfShown;
+$('paper').oninput = rerenderIfShown;
+$('gradA').oninput = rerenderIfShown;
+$('gradB').oninput = rerenderIfShown;
+$('gradDir').onchange = rerenderIfShown;
+
+const paper = { mode: 'solid', source: null, image: null };
+function setPaperMode(mode) {
+  paper.mode = mode;
+  for (const [id, name] of [['modeSolid', 'solid'], ['modeGrad', 'grad'], ['modePhoto', 'photo']]) {
+    const on = name === mode;
+    $(id).classList.toggle('on', on);
+    $(id).setAttribute('aria-pressed', String(on));
+  }
+  $('solidField').hidden = mode !== 'solid';
+  $('gradPanel').hidden = mode !== 'grad';
+  $('photoPanel').hidden = mode !== 'photo';
+  rerenderIfShown();
+}
+$('modeSolid').onclick = () => setPaperMode('solid');
+$('modeGrad').onclick = () => setPaperMode('grad');
+$('modePhoto').onclick = () => setPaperMode('photo');
+
+function paperAspect() {
+  const layout = layoutFor(kind);
+  return layout.width / layout.height;
+}
+function needsCrop(canvas, layout) {
+  const aspect = canvas.width / canvas.height;
+  const target = layout.width / layout.height;
+  const offRatio = Math.abs(aspect - target) / target > 0.02;
+  const tooBig = canvas.width > layout.width || canvas.height > layout.height;
+  return offRatio || tooBig;
+}
+function coverCrop(source, layout) {
+  const out = document.createElement('canvas');
+  out.width = layout.width;
+  out.height = layout.height;
+  const scale = Math.max(layout.width / source.width, layout.height / source.height);
+  const w = source.width * scale, h = source.height * scale;
+  out.getContext('2d').drawImage(source, (layout.width - w) / 2, (layout.height - h) / 2, w, h);
+  return out;
+}
+
+let crop = null;
+function stageSize(aspectW, aspectH) {
+  const maxW = Math.min(340, window.innerWidth - 72);
+  const maxH = Math.min(300, Math.max(160, window.innerHeight - 240));
+  let w = maxW;
+  let h = w * aspectH / aspectW;
+  if (h > maxH) {
+    h = maxH;
+    w = h * aspectW / aspectH;
+  }
+  return { w: Math.max(96, Math.round(w)), h: Math.max(96, Math.round(h)) };
+}
+function openCrop(source, options) {
+  const stage = $('cropStage');
+  const size = stageSize(options.aspectW, options.aspectH);
+  stage.width = size.w;
+  stage.height = size.h;
+  stage.style.width = size.w + 'px';
+  stage.style.height = size.h + 'px';
+  const base = Math.max(stage.width / source.width, stage.height / source.height);
+  let zoom = 1;
+  let x = (stage.width - source.width * base) / 2;
+  let y = (stage.height - source.height * base) / 2;
+  if (options.initial) {
+    zoom = Math.min(4, Math.max(1, (stage.width / options.initial.w) / base));
+    const view = base * zoom;
+    x = -options.initial.x * view;
+    y = -options.initial.y * view;
+  }
+  crop = { source, base, zoom, x, y, mode: options.mode, index: options.index };
+  $('cropZoom').value = String(zoom);
+  $('cropTitle').textContent = options.title;
+  $('cropHint').textContent = options.hint;
+  $('cropOk').textContent = options.ok;
+  $('cropModal').hidden = false;
+  drawCrop();
+}
+function openPaperCrop(source) {
+  const layout = layoutFor(kind);
+  openCrop(source, {
+    mode: 'paper',
+    aspectW: layout.width,
+    aspectH: layout.height,
+    title: needsCrop(source, layout) ? '先裁成相纸比例' : '调整相纸画面',
+    hint: '按住左键拖动，松开即停。缩放时格子大小不变，画面始终铺满。',
+    ok: '用这块做相纸'
+  });
+}
+function openSlotCrop(index) {
+  const item = items[index];
+  if (!item) return;
+  const slot = layoutFor(kind).slots[index];
+  const initial = item.crop && aspectClose(item.crop, slot)
+    ? item.crop
+    : cropFor(item.canvas.width, item.canvas.height, slot, item.focus || { x: 0.5, y: 0.46 });
+  openCrop(item.canvas, {
+    mode: 'slot',
+    index,
+    aspectW: slot.w,
+    aspectH: slot.h,
+    title: '第 ' + (index + 1) + ' 格的画面',
+    hint: '按住左键拖动，松开即停。缩放时格子大小不变，画面始终铺满。',
+    ok: '用在这一格',
+    initial
+  });
+}
+function clampCrop() {
+  const stage = $('cropStage');
+  const w = crop.source.width * crop.base * crop.zoom;
+  const h = crop.source.height * crop.base * crop.zoom;
+  crop.x = Math.min(0, Math.max(stage.width - w, crop.x));
+  crop.y = Math.min(0, Math.max(stage.height - h, crop.y));
+}
+function drawCrop() {
+  const stage = $('cropStage');
+  stage.style.width = stage.width + 'px';
+  stage.style.height = stage.height + 'px';
+  const ctx = stage.getContext('2d');
+  let w = crop.source.width * crop.base * crop.zoom;
+  let h = crop.source.height * crop.base * crop.zoom;
+  if (w < stage.width - 0.5 || h < stage.height - 0.5) {
+    const bump = Math.max(stage.width / w, stage.height / h);
+    crop.zoom *= bump;
+    w *= bump;
+    h *= bump;
+  }
+  clampCrop();
+  ctx.fillStyle = '#1c1b18';
+  ctx.fillRect(0, 0, stage.width, stage.height);
+  ctx.drawImage(crop.source, crop.x, crop.y, w, h);
+}
+function visibleRect() {
+  const stage = $('cropStage');
+  const view = crop.base * crop.zoom;
+  const w = stage.width / view;
+  const h = stage.height / view;
+  return {
+    x: Math.min(Math.max(0, -crop.x / view), Math.max(0, crop.source.width - w)),
+    y: Math.min(Math.max(0, -crop.y / view), Math.max(0, crop.source.height - h)),
+    w, h
+  };
+}
+function applyCrop() {
+  const rect = visibleRect();
+  if (crop.mode === 'slot') {
+    const index = crop.index;
+    items[index].crop = rect;
+    $('cropModal').hidden = true;
+    crop = null;
+    paintSlot(index);
+    outputBlob = null;
+    rerenderIfShown();
+    say('第 ' + (index + 1) + ' 格已按你选的区域裁切。');
+    return;
+  }
+  const layout = layoutFor(kind);
+  const out = document.createElement('canvas');
+  out.width = layout.width;
+  out.height = layout.height;
+  out.getContext('2d').drawImage(crop.source, rect.x, rect.y, rect.w, rect.h, 0, 0, layout.width, layout.height);
+  paper.image = out;
+  paper.source = crop.source;
+  const swatch = $('paperSwatch');
+  swatch.src = out.toDataURL('image/jpeg', 0.7);
+  swatch.hidden = false;
+  $('paperRecrop').hidden = false;
+  $('paperClear').hidden = false;
+  $('cropModal').hidden = true;
+  crop = null;
+  setPaperMode('photo');
+  say('相纸已换成裁好的图片。');
+}
+let cropDrag = null;
+function endCropDrag(stage) {
+  if (cropDrag && cropDrag.timer) clearTimeout(cropDrag.timer);
+  cropDrag = null;
+  stage = stage || $('cropStage');
+  stage.onpointermove = null;
+  stage.onpointerup = null;
+  stage.onpointercancel = null;
+}
+$('cropZoom').oninput = () => {
+  if (!crop) return;
+  const stage = $('cropStage');
+  const prev = crop.zoom || 1;
+  const next = Math.max(1, Number($('cropZoom').value) || 1);
+  const view0 = crop.base * prev;
+  const cx = (stage.width / 2 - crop.x) / view0;
+  const cy = (stage.height / 2 - crop.y) / view0;
+  crop.zoom = next;
+  const view1 = crop.base * next;
+  crop.x = stage.width / 2 - cx * view1;
+  crop.y = stage.height / 2 - cy * view1;
+  drawCrop();
+};
+$('cropStage').onpointerdown = event => {
+  if (!crop) return;
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+  const stage = event.currentTarget;
+  endCropDrag(stage);
+  const bounds = stage.getBoundingClientRect();
+  const sx = stage.width / bounds.width || 1;
+  const sy = stage.height / bounds.height || 1;
+  const hold = event.pointerType === 'mouse' ? 320 : 0;
+  cropDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    originX: crop.x,
+    originY: crop.y,
+    sx, sy, active: false, timer: null
+  };
+  const arm = () => {
+    if (!cropDrag || cropDrag.pointerId !== event.pointerId) return;
+    cropDrag.active = true;
+    try { stage.setPointerCapture(event.pointerId); } catch (error) {}
+  };
+  if (hold) cropDrag.timer = setTimeout(arm, hold);
+  else arm();
+  stage.onpointermove = move => {
+    if (!cropDrag || !crop || move.pointerId !== cropDrag.pointerId || !cropDrag.active) return;
+    crop.x = cropDrag.originX + (move.clientX - cropDrag.startX) * cropDrag.sx;
+    crop.y = cropDrag.originY + (move.clientY - cropDrag.startY) * cropDrag.sy;
+    drawCrop();
+  };
+  const stop = up => {
+    if (cropDrag && up.pointerId !== cropDrag.pointerId) return;
+    endCropDrag(stage);
+  };
+  stage.onpointerup = stop;
+  stage.onpointercancel = stop;
+};
+$('cropCancel').onclick = () => { $('cropModal').hidden = true; crop = null; };
+$('cropOk').onclick = () => { if (crop) applyCrop(); };
+$('paperPick').onclick = () => $('paperFile').click();
+$('paperFile').onchange = async event => {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    say('正在读取相纸图片…');
+    const source = await loadFile(file);
+    const layout = layoutFor(kind);
+    paper.source = source;
+    if (needsCrop(source, layout)) openPaperCrop(source);
+    else {
+      paper.image = coverCrop(source, layout);
+      const swatch = $('paperSwatch');
+      swatch.src = paper.image.toDataURL('image/jpeg', 0.7);
+      swatch.hidden = false;
+      $('paperRecrop').hidden = false;
+      $('paperClear').hidden = false;
+      setPaperMode('photo');
+      say('这张图刚好适合当前相纸，已直接铺上。');
+    }
+  } catch (error) {
+    say(error.message || '相纸图片读取失败');
+  }
+};
+$('paperRecrop').onclick = () => { if (paper.source) openPaperCrop(paper.source); };
+$('paperClear').onclick = () => {
+  paper.source = null;
+  paper.image = null;
+  $('paperSwatch').hidden = true;
+  $('paperRecrop').hidden = true;
+  $('paperClear').hidden = true;
+  rerenderIfShown();
+};
+
+function paintPaper(ctx, layout) {
+  if (paper.mode === 'grad') {
+    const dir = $('gradDir').value;
+    const grad = dir === 'right'
+      ? ctx.createLinearGradient(0, 0, layout.width, 0)
+      : dir === 'diag'
+        ? ctx.createLinearGradient(0, 0, layout.width, layout.height)
+        : ctx.createLinearGradient(0, 0, 0, layout.height);
+    grad.addColorStop(0, $('gradA').value || '#ffffff');
+    grad.addColorStop(1, $('gradB').value || '#d7c4a3');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, layout.width, layout.height);
+    return;
+  }
+  if (paper.mode === 'photo' && paper.image) {
+    ctx.drawImage(paper.image, 0, 0, layout.width, layout.height);
+    return;
+  }
+  ctx.fillStyle = $('paper').value || '#ffffff';
+  ctx.fillRect(0, 0, layout.width, layout.height);
+}
+
+function drawFrame(ctx, name, layout) {
+  const title = ($('title').value || 'Haru film').trim();
+  const showDate = $('showDate').checked;
+  const date = showDate ? ($('date').value || new Date().toLocaleDateString('zh-CN')).trim() : '';
+  paintPaper(ctx, layout);
+  ctx.fillStyle = '#161616';
+  if (name === 'grid') {
+    ctx.font = 'bold 64px "Iowan Old Style","Songti SC",Georgia,serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, layout.width / 2, 128);
+    ctx.font = '28px "Songti SC",Georgia,serif';
+    ctx.fillStyle = '#6d6a62';
+    if (showDate) ctx.fillText(date, layout.width / 2, 178);
+  } else {
+    ctx.save();
+    ctx.translate(582, 1860);
+    ctx.rotate(-Math.PI / 2);
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#161616';
+    ctx.fillText(title, 40, 0);
+    ctx.font = '13px sans-serif';
+    ctx.fillStyle = '#444';
+    if (showDate) ctx.fillText(date, 520, 0);
+    ctx.fillText(title, 980, 0);
+    if (showDate) ctx.fillText(date, 1400, 0);
+    ctx.restore();
+    ctx.fillStyle = '#161616';
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(8, 70 + i * 440);
+      ctx.lineTo(17, 48 + i * 440);
+      ctx.lineTo(26, 70 + i * 440);
+      ctx.fill();
+    }
+  }
+}
+
+async function render() {
+  $('make').disabled = true;
+  say(items.some(Boolean) ? '正在对准人脸并排版…' : '正在排版…');
+  const layout = layoutFor(kind);
+  for (const item of items) if (item) item.focus = await focusOf(item.canvas);
+  const canvas = $('output');
+  canvas.width = layout.width;
+  canvas.height = layout.height;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  drawFrame(ctx, kind, layout);
+  items.forEach((item, index) => {
+    if (!item) return;
+    const slot = layout.slots[index];
+    const frame = item.crop && aspectClose(item.crop, slot)
+      ? item.crop
+      : cropFor(item.canvas.width, item.canvas.height, slot, item.focus);
+    ctx.drawImage(item.canvas, frame.x, frame.y, frame.w, frame.h, slot.x, slot.y, slot.w, slot.h);
+  });
+  outputBlob = await new Promise((ok, fail) => {
+    canvas.toBlob(blob => blob ? ok(blob) : fail(new Error('导出失败')), 'image/png');
+  });
+  $('result').hidden = false;
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  say('好了。可以下载；改标题、日期或版式会马上重排。');
+  update();
+}
+
+$('make').onclick = () => render().catch(error => { say(error.message || '生成失败'); update(); });
+$('showDate').onchange = () => rerenderIfShown();
+$('date').oninput = () => rerenderIfShown();
+$('title').oninput = () => rerenderIfShown();
+$('download').onclick = () => {
+  if (!outputBlob) return;
+  const url = URL.createObjectURL(outputBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fourcuts-' + Date.now() + '.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  recordSave(outputBlob);
+};
+async function recordSave(blob) {
+  try {
+    const response = await fetch('/api/saves', {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/png' },
+      body: blob
+    });
+    if (!response.ok) throw new Error('record failed');
+    say('已下载，并记到后台。');
+  } catch (_) {
+    say('已下载。这个地址没有记录后台，合成图只留在你的电脑。');
+  }
+}
+
+let stream = null;
+let useTimer = false;
+let nextShot = 0;
+function stopCam() {
+  if (stream) stream.getTracks().forEach(track => track.stop());
+  stream = null;
+  $('video').srcObject = null;
+  $('cam').hidden = true;
+  $('count').textContent = '';
+}
+$('camClose').onclick = stopCam;
+$('timerToggle').onclick = () => {
+  useTimer = !useTimer;
+  $('timerToggle').textContent = '倒计时：' + (useTimer ? '开（3 秒）' : '关');
+};
+$('shoot').onclick = async () => {
+  nextShot = items.findIndex(item => !item);
+  if (nextShot < 0) nextShot = 0;
+  $('camStep').textContent = String(nextShot + 1);
+  $('cam').hidden = false;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 } },
+      audio: false
+    });
+    $('video').srcObject = stream;
+    $('camNote').textContent = '每按一次快门填入下一个空位，拍满四张会自动关闭。预览是镜像，成片会转正。';
+  } catch (_) {
+    $('camNote').textContent = '没有拿到摄像头权限，可以改用上传照片。';
+  }
+};
+async function grab() {
+  const video = $('video');
+  if (!video.videoWidth) throw new Error('摄像头还没准备好');
+  const canvas = document.createElement('canvas');
+  const ratio = Math.min(1, 2400 / Math.max(video.videoWidth, video.videoHeight));
+  canvas.width = Math.round(video.videoWidth * ratio);
+  canvas.height = Math.round(video.videoHeight * ratio);
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(ok => canvas.toBlob(ok, 'image/jpeg', 0.92));
+  await put(new File([blob], 'shot.jpg', { type: 'image/jpeg' }), nextShot);
+  nextShot = items.findIndex(item => !item);
+  if (nextShot < 0) {
+    stopCam();
+    say('四张都拍好了。');
+    return;
+  }
+  $('camStep').textContent = String(nextShot + 1);
+}
+$('shutter').onclick = async () => {
+  $('shutter').disabled = true;
+  try {
+    if (useTimer) {
+      for (let n = 3; n >= 1; n--) {
+        $('count').textContent = String(n);
+        await new Promise(resolve => setTimeout(resolve, 700));
+      }
+      $('count').textContent = '';
+    }
+    await grab();
+  } catch (error) {
+    say(error.message || '拍摄失败');
+  }
+  $('shutter').disabled = false;
+};
+</script>
+</body>
+</html>
